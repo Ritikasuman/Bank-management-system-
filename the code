@@ -1,0 +1,332 @@
+#include <iostream>
+#include <string>
+#include <fstream>
+#include <unistd.h>
+#include <iomanip>
+#include<conio.h>
+
+using namespace std;
+
+const int maxrow = 5;
+const string AUTHENTICATION_PIN = "bank";
+
+class Bank
+{
+private:
+    int x;
+    double balance=0;
+    char name[50];
+    char accountno[5];
+    string Accountholder[maxrow] = {};
+    string Accountno[maxrow] = {};
+    double Balance[maxrow] = {};
+
+public:
+//To Add Account
+    void AddAccount()
+{
+    cin.ignore();
+    cout << "Account no:";
+    cin.getline(accountno, 5);
+    cout << "Customer Name:";
+    cin.getline(name, 50);
+
+    for (int x = 0; x < maxrow; x++)
+    {
+        if (Accountno[x] == "\0")
+        {
+            Accountno[x] = accountno;
+            Accountholder[x] = name;
+
+            cout << "Enter Initial Balance:";
+            cin >> this->balance;
+            Balance[x] = this->balance; // Assign balance after reading user input
+            break;
+        }
+    }
+}
+    //To View All Accounts in Bank    
+   
+  void viewacc()
+{
+    system("cls");
+    cout << "Current Accounts" << endl;
+    cout << "=====================================================================" << endl;
+    int counter = 0;
+    cout << " No.  |   Account no   |            NAME         |     BALANCE  " << endl
+         << "=====================================================================" << endl;
+    for (int x = 0; x < maxrow; x++)
+    {
+        if (Accountno[x] != "\0")
+        {
+            counter++;
+            cout << " " << counter << "     " << setw(10) << Accountno[x] << "    " << setw(20) << Accountholder[x] << "       " <<setw(10) <<Balance[x] << endl;
+        }
+    }
+    if (counter == 0)
+    {
+        cout << "No Account Found!" << endl;
+    }
+    cout << "=====================================================================" << endl;
+}
+  // Existing member functions...
+
+    // Function to check if the account number exists
+    bool accountExists(string search)
+    {
+        for (int x = 0; x < maxrow; x++)
+        {
+            if (Accountno[x] == search)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    //To Search Existing Account 
+    void SearchAccount(string search)
+    {
+        system("cls");
+        cout << "Current Accounts" << endl;
+        cout << "=====================================================================" << endl;
+        int counter = 0;
+        bool found = false;
+         cout << " No.  |   Account no   |            NAME         |     BALANCE  " << endl
+         << "=====================================================================" << endl;
+        for (int x = 0; x < maxrow; x++)
+        {
+            if (Accountno[x] == search)
+            {
+                counter++;
+                cout << " " << counter << "     " << setw(10) << Accountno[x] << "    " << setw(20) << Accountholder[x] << "       " <<setw(10) <<Balance[x] << endl;                found = true;
+            }
+        }
+        if (!found)
+        {
+            cout << "No Account Found!" << endl;
+        }
+        cout << "=====================================================================" << endl;
+       }
+
+    // Deposit function
+    void deposit(string search, double amount)
+    {
+        for (int x = 0; x < maxrow; x++)
+        {
+            if (Accountno[x] == search)
+            {
+                Balance[x] += amount;
+                cout << "Deposit successful. New balance: " << Balance[x] << endl;
+                break;
+            }
+        }
+    }
+
+    // Withdrawal function
+    void withdrawal(string search, double amount)
+    {
+        for (int x = 0; x < maxrow; x++)
+        {
+            if (Accountno[x] == search)
+            {
+                if (Balance[x] >= amount)
+                {
+                    Balance[x] -= amount;
+                    cout << "Withdrawal successful. New balance: " << Balance[x] << endl;
+                }
+                else
+                {
+                    cout << "Insufficient funds. Withdrawal failed." << endl;
+                }
+                break;
+            }
+        }
+    }
+   
+    // Check balance 
+void checkBalance()
+{
+    string search;
+    cout << "Enter Account Number: ";
+    cin >> search;
+
+    for (int x = 0; x < maxrow; x++)
+    {
+        if (Accountno[x] == search)
+        {
+            cout << "Current Balance for Account " << Accountno[x] << ": " << Balance[x] << endl;
+            return; 
+            // Exit the function after displaying the balance
+        }
+    }
+
+    cout << "Account not found!" << endl;
+     }
+
+     };
+// Enums for menu options
+    enum MenuOption
+    {
+    CREATE_ACCOUNT = 1,
+    VIEW_ACCOUNTS,
+    SEARCH_ACCOUNT,
+    DEPOSIT,
+    WITHDRAWAL,
+    CHECK_BALANCE,
+    EXIT
+    };
+
+// Function to get a valid menu choice from the user
+     MenuOption getUserChoice()
+   {
+    int choice;
+    cout << "Enter your choice: ";
+    cin >> choice;
+
+    while (choice < CREATE_ACCOUNT || choice > EXIT)
+    {
+        cout << "Invalid choice. Please enter a valid option: ";
+        cin >> choice;
+    }
+
+    return static_cast<MenuOption>(choice);
+    }
+
+int main()
+{
+    string accountno;
+    string pin;
+    char ch;
+
+    cout << "\n\n\n\n\n\n\n\n\t\t\t\t\t\t     BANK\n\n";
+    cout << "\t\t\t\t\t------------------------------";
+    cout << "\n\t\t\t\t\t\t     LOGIN \n";
+    cout << "\t\t\t\t\t------------------------------\n\n";
+
+    // Prompt for PIN entry
+    cout << "\t\t\t\t\tENTER PIN:  ";
+    // Use _getch() to capture characters without displaying them
+    while (true)
+    {
+        ch = _getch();
+        if (ch == 13) // Enter key pressed
+            break;
+        else if (ch == 8) // Backspace key pressed
+        {
+            if (!pin.empty())
+            {
+                cout << "\b \b"; // Move cursor back, erase last character, move cursor back again
+                pin.pop_back(); // Remove the last character from the PIN
+            }
+        }
+        else
+        {
+            cout << '*'; // Display '*' for each character entered
+            pin += ch;    // Append the character to the PIN
+        }
+    }
+      if (pin != AUTHENTICATION_PIN)
+    {
+        cout << "\nAuthentication failed. Exiting...\n";
+        return 1;
+    }
+    int choice;
+    Bank B;
+    system("cls");
+
+   do
+    {
+        cout << "\n----------Bank Application----------";
+        cout << "\n1. Create Account";
+        cout << "\n2. View Existing Accounts";
+        cout << "\n3. Search Account";
+        cout << "\n4. Deposit";
+        cout << "\n5. Withdrawal";
+        cout << "\n6. Check Balance";
+        cout << "\n7. Exit";
+        cout << "\n-------------------------------------\n";
+
+        MenuOption choice = getUserChoice();
+
+        switch (choice)
+        {
+        case 1:
+        {
+            B.AddAccount();
+            break;
+        }
+        case 2:
+            B.viewacc();
+            break;
+        case 3:
+        {
+            cin.ignore();
+            cout << "Search by Accountno.: ";
+            getline(cin, accountno);
+            B.SearchAccount(accountno);
+            break;
+        }       
+        case 4:
+    {
+       double depositAmount;
+       cout << "Enter the amount to be deposited: ";
+       cin >> depositAmount;
+       cin.ignore();  // Clear the newline character from the input buffer
+       cout << "Enter the account number: ";
+       getline(cin, accountno);
+       B.deposit(accountno, depositAmount);
+       B.viewacc(); // Display updated balance
+       break;
+    }
+      
+        case 5:
+        {
+            double withdrawalAmount;
+            cout << "Enter the amount for withdrawal: ";
+            cin >> withdrawalAmount;
+
+            if (withdrawalAmount < 0)
+            {
+                cout << "Invalid withdrawal amount. Please enter a non-negative value.\n";
+                break;
+            }
+
+            cin.ignore(); // Clear the newline character from the input buffer
+            cout << "Enter the account number: ";
+            getline(cin, accountno);
+
+            // Validate if the account number exists before proceeding
+            if (!B.accountExists(accountno))
+            {
+                cout << "Invalid account number. Please enter a valid account number.\n";
+                break;
+            }
+
+            B.withdrawal(accountno, withdrawalAmount);
+            B.viewacc(); // Display updated balance
+            break;
+        }
+        case 6:
+        {
+            B.checkBalance();
+            break;
+        }
+        }
+        if(choice==EXIT)
+        {
+            break;
+        }
+
+    } while (true);
+    system("cls");
+    cout << "\n";
+    cout<<"----------               ______      _____    |    |        |    |     ______             "<<endl;
+    cout<<"    |       |       |   |      |    |     |   |   /         |    |    |      |   |      | "<<endl;
+    cout<<"    |       |_______|   |______|    |     |   |---          |____|    |      |   |      | "<<endl;
+    cout<<"    |       |       |   |      |    |     |   |   |             /     |      |   |      | "<<endl;
+    cout<<"    |       |       |   |      |    |     |   |   |            /      |______|   |______| "<<endl;
+    return 0;
+}
+
+        
